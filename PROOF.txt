@@ -1,0 +1,435 @@
+SMOOTH CUBIC-GAUSS PROJECTIONS WITH COPRIMALITY MASKS
+A checked source assembly over the Eisenstein integers
+
+STATUS
+
+The mixed theorem, its explicit prime-cost table, and the coprimality-mask
+corollaries below are compiled in Lean
+4.34.1 with only propext, Classical.choice and Quot.sound. This companion
+records a formalization checkpoint, not a novelty or priority claim.
+It does not change a zeta or L-function zero-free endpoint. The estimate
+is an upper bound; no assertion of optimality is made.
+
+1. FIELD, CHARACTERS, AND NORMALIZATION
+
+Let O=Z[omega], where omega=exp(2*pi*i/3). Write N(a)=|O/a| for a
+nonzero integral ideal a. Let lambda=omega-1 and Lambda=1+2*omega.
+The two elements are associates; keeping Lambda explicit fixes the
+additive-character convention. Use the canonical primary generator
+n_a=primaryGenerator(a) from the upstream source. Its exceptional value
+zero is retained exactly as in that definition.
+
+For every prime ideal p away from lambda, let chi_{6,p} be the source's
+canonical local sextic character, extended by zero on the nonunits of
+O/p. The restriction on residue characteristic 2 applies only to the
+supported moving ideal I in section 2; it is not a restriction on the
+squarefree ideals occurring in gamma. In particular, those ideals may
+contain the prime ideal (2). Powers below mean powers of zero-extended
+multiplicative characters. Exponent zero is the principal character with
+value zero at zero, not the constant-one function. For a squarefree ideal
+a with n_a nonzero, set chi_a=product_{p|a} chi_{6,p}^2, the corresponding
+cubic character.
+
+Define the normalized source Gauss sum by the exact trace convention
+
+    g_2(a) = (Na)^(-1/2) sum_{x mod a} chi_a(x)
+                         exp(2*pi*i*Tr_{Q(omega)/Q}(x/(Lambda*n_a))).
+
+Here the quotient is identified through (n_a)=a. The equality to the
+Lean convention is quotientTrace_mk together with
+cuspFrequency(h)=embedding(h)/(3*Lambda). This is the same character used
+by gaussTwo; the normalization denominator is |n_a|=sqrt(Na).
+Set theta_{-1}(n)=conj(n/|n|) and
+
+    gamma(a) = theta_{-1}(n_a)*g_2(a)
+
+when a is squarefree and n_a is nonzero, and gamma(a)=0 otherwise.
+Thus gamma is precisely squarefreeGaussCoefficient, including its
+squarefree and primary-support masks. |gamma(a)|<=1.
+
+For comparison only, if G_paper(a) uses exp(2*pi*i*Tr(x/n_a)) instead,
+change variables x=Lambda*y to obtain
+
+    g_2(a)=chi_a(Lambda)*G_paper(a),
+    gamma(a)=theta_{-1}(n_a)*chi_a(Lambda)*G_paper(a).
+
+There is no conjugation of G_paper in this formula. Omitting the fixed
+Lambda twist would change the mathematical statement. The theorem below
+uses gamma as defined above and does not depend on translating conventions.
+
+2. PRECISE THEOREM
+
+Fix a smooth W:R->C and real lo,hi with lo>0 and supp(W) contained in
+[lo,hi]. There is C_W>=0, chosen before all the following data.
+
+Let I be a nonzero integral ideal, with every prime factor avoiding
+lambda and having residue characteristic different from 2. This is
+exactly CanonicalQuadraticSieve.Supported(I). Let Q be any nonzero
+integral ideal. Let phi:O->C be multiplicative, with phi(1)=1,
+|phi(n)|<=1 for every n, and phi factoring through O/Q.
+
+Let F be the set of prime ideals p dividing I with Q not contained in p.
+Equivalently, F consists of prime factors of I outside the fixed modulus.
+For p in F put q_p=Np and j_p=v_p(I) mod 6, and define
+
+    Psi(n) = phi(n) product_{p in F} chi_{6,p}(n mod p)^(j_p).
+    P_Psi,W(L) = sum_a gamma(a)*Psi(n_a)*W(Na/L),    L>0.
+
+The character powers in this display retain the zero-extension masks
+specified in section 1. The sum is over all integral ideals; only finitely
+many terms survive the support of W and gamma. Define
+
+    d_0(q) = 1-q^(-1)+q^(1/2),
+    d_4(q) = 2*q^(1/2)+q^(-1),
+    d_j(q) = q                  for j=1,2,3,5,
+    D(I,Q) = product_{p in F} d_{j_p}(q_p).
+
+Then, for every L>0,
+
+    |P_Psi,W(L)| <= C_W sqrt(L) (NQ)^(3/4) sqrt(D(I,Q)).             (1)
+
+The empty product is one. There is no restriction on the number of
+moving primes or their mixture of exponents. C_W is independent of
+I,Q,phi,L. The fixed modulus price (NQ)^(3/4) has not been absorbed into
+an allegedly uniform constant.
+
+Exact Lean statement:
+QRHExperimental.CompositeProjectionCosts.rawProjection_composite_prime_product
+in lean/CompositeProjectionCosts.lean. The companion theorem
+sourceCost_eq_prime_product proves the displayed table uses actual ideal
+norms. This is a fixed-W theorem; profile-uniform applications require
+additional uniform seminorm estimates.
+
+3. COMPLETION AND THE EXACT INVERSE
+
+Write V(y)=sqrt(y)*W(y) and use the upstream multiplicative cube weight
+
+    c_Psi(b) = conj(n_b/|n_b|)^3 * Psi(n_b)^3 / Nb,
+
+with the source's zero convention when n_b=0. It satisfies
+|c_Psi(b)|<=1/Nb. Define the actual completed source
+
+    T_Psi,W(X) = sum_{a,b} [gamma(a)*Psi(n_a)/sqrt(Na)] * c_Psi(b)
+                         * V(Na*(Nb)^3/X).
+
+This is completedT. The factors sqrt(Na), V and c_Psi must be kept in
+this exact arrangement; changing them alters the cube-inversion weight.
+Upstream's finite-support ideal Mobius convolution gives
+
+    P_Psi,W(L)/sqrt(L)
+      = sum_h mu(h)*c_Psi(h)*T_Psi,W(L/(Nh)^3).                    (2)
+
+It holds for every positive L and compactly supported W. We will use
+only |mu(h)|<=1 and |c_Psi(h)|<=1/Nh, not cancellation of this sum.
+The norm-one Gauss bound and linear ideal counting give, uniformly in
+bounded multiplicative Psi,
+
+    |P_Psi,W(L)| <= C_W L,
+    |T_Psi,W(X)| <= C_W sqrt(X).                                  (3)
+
+The relevant exact source is GaussSum/CompletedExpansion.lean,
+completed_cube_inverse. Included files TrivialProjection.lean,
+TrivialCompleted.lean, UniformTrivial.lean and CubeInverseAssembly.lean
+supply the norm bounds and the explicit inversion/balancing assembly.
+
+4. SPARSE RADIAL MASS AND THE KERNEL
+
+The three actual cusp coefficient systems have nonzero frequencies
+indexed by a unit u, an integer m>=0, a squarefree eligible ideal a and
+an eligible ideal b. Apart from fixed cusp factors of bounded modulus,
+the radial length and an absolute coefficient majorant are
+
+    rho = 3^m*(Na)*(Nb)^3,
+    w   = 3^(-m/3)*(Na)^(-1/2)*(Nb)^(-1).
+
+These formulas are the source's squarefree-times-cube support theorem;
+no random-phase or independent-coefficient assumption is introduced.
+Linear ideal counting implies
+sum_{Na<=U}(Na)^(-1/2)<=C sqrt(U). Consequently
+
+    sum_{rho<=T} w <= C sqrt(T)
+
+because summing first over a leaves
+sqrt(T)*3^(-5m/6)*(Nb)^(-5/2), and both remaining sums converge.
+The finite unit sectors and three cusps affect only C.
+
+The same argument keeps prescribed divisors simultaneously. For nonzero
+ideals A,B, multiplication of ideals is injective and norms multiply, so
+
+    sum_{rho<=T, A|a, B|b} w
+      <= C sqrt(T)*(NA)^(-1)*(NB)^(-5/2).                          (4)
+
+The constant is the SAME for every A,B. One must not apply a separate
+one-prime estimate and then raise an unrecorded constant to the number
+of primes. DivisorIdealMass.lean and DivisorRadialMass.lean prove (4);
+CompositeModelKernel.lean performs the finite branch expansion with
+one global constant.
+
+The existing smooth reflection kernel K_W satisfies
+|K_W(t)|<=A_W for 0<t<=1 and |K_W(t)|<=A_W/t for t>=1.
+If nonnegative mass has cumulative bound C sqrt(T), split at rho=1/v.
+The lower range contributes at most C*A_W*v^(-1/2). On upper bands
+4^k/v<rho<=4^(k+1)/v, divide the band mass by its lower radial endpoint;
+the resulting geometric series is at most 4*C*A_W*v^(-1/2). Therefore
+
+    sum |b_rho*K_W(v*rho)| <= 5*C*A_W*v^(-1/2).                   (5)
+
+This also proves absolute summability. WeightedKernelBound.lean and
+EndpointProjection.lean implement this endpoint argument, including
+the smooth-kernel estimates drawn from the upstream Mellin machinery.
+
+5. EXACT LOCAL BRACKETS AND SIMULTANEOUS PRIME COSTS
+
+Fix any active subset S of the moving primes. The source's exact
+controlled reflection formula contains a product of local brackets,
+not an arbitrary finite Fourier transform. For q=Np and exponent j,
+their bounds are
+
+    j=0:       |B_{p,0}(x)| <= q^(-1/2),
+    j=4:       |B_{p,4}(x)| <= q^(-1/2)+q^(1/2)*1_{p|x},
+    j=1,2,3,5: |B_{p,j}(x)| <= 1.
+
+For every nonzero supported frequency in each of the three cusps, the
+phase numerator x is a unit times a power of lambda times n_a*n_b^3.
+As every moving prime is good, p|x holds exactly when p|a or p|b.
+Use 1_{p|x}<=1_{p|a}+1_{p|b}. Expand the finite product over p in S.
+For each branch choice, group its a-divisors into A and its b-divisors
+into B. Distinct moving primes are coprime. Applying (4) once, then
+summing the branch choices, gives the local reflected factors
+
+    k_0(q) = q^(-1/2),
+    k_4(q) = q^(-1/2)+q^(1/2)*q^(-1)+q^(1/2)*q^(-5/2)
+           = 2*q^(-1/2)+q^(-2),
+    k_j(q) = 1                     for j=1,2,3,5.                 (6)
+
+All source phases outside the brackets have norm at most one or fixed
+absolute norm. Combining (5) with the exact reflection identity gives
+ONE constant C_W, uniform over S, every prime family, and source geometry.
+The precise stratum bound is
+
+    |F_S(X)| <= C_W product_{p in S} k_{j_p}(q_p)
+         * [X/(27*s_cusp^2*N(c0*product_{p in S} pi_p)^2)]^(-1/2), (7)
+
+where pi_p is the source's primary generator of p. The geometry has
+c0 dividing c, with (c)=(9)*Q. The three cusp scales satisfy the checked
+uniform estimate
+
+    bracketed factor in (7) <= 16*N(c)*product_{p in S} q_p/sqrt(X).
+
+Thus active local cost is a_j(q)=q*k_j(q). No dependence of C_W on the
+number of moving primes has been introduced.
+
+The source lemmas are GaussSum/ReflectionBrackets.lean and
+Eisenstein/FixedConductor.lean; the actual frequency/divisibility adapter
+is in PhaseNumeratorSupport.lean. CompositeBracketDomination.lean and
+CompositeControlledReflection.lean apply the exact source formula.
+
+6. ALL ACTIVE AND INACTIVE STRATA, THEN THE FIXED MODULUS
+
+Upstream fixedFree_completedT_eq_actualControlledSource is an exact
+identity. It expresses T as thetaDerivativeScalar^(-1) times the fixed
+Fourier sum and an inner sum over ALL active subsets S. A prime outside
+S contributes
+
+    b_j(q) = 1-1/q if j=0, and 0 otherwise.
+
+This coefficient is real and nonnegative. It follows directly from the
+exact zero-frequency Fourier coefficient of the zero-extended character.
+For j=0 it cannot be deleted. Using (7) and the same C_W for every S,
+
+the sum of absolute stratum bounds contains exactly
+
+    sum_{S subset F} product_{p notin S} b_{j_p}(q_p)
+                         * product_{p in S} a_{j_p}(q_p)
+      = product_{p in F} (a_{j_p}(q_p)+b_{j_p}(q_p)) = D(I,Q).     (8)
+
+The equality is the finite product expansion. In particular, no extra
+factor for the number of subsets is needed. The local factor 2 in d_4
+is retained, not hidden in C_W.
+
+The normalized fixed Fourier coefficients satisfy Parseval and hence
+sum_h |fixedThetaRowCoeff(h)|<=sqrt(N(c)), since |phi|<=1.
+Combine this with the N(c) factor in (7) and (8). Since N(c)=81*NQ,
+the fixed factor 81 and theta scalar are absorbed into C_W, giving
+
+    |T_Psi,W(X)| <= C_W (NQ)^(3/2) D(I,Q) X^(-1/2).              (9)
+
+All fixed bad-prime masks, unit sectors, primary choices, and coprimality
+conditions are those of the exact source identity. ActiveStratumBound
+proves (8), FiniteBaseBounds proves the geometry/Parseval bounds, and
+CompositeProjection proves (9) on the actual source.
+
+7. BALANCING THE CUBE INVERSE
+
+Put R=(NQ)^(3/2)*D(I,Q)>0. If L<=R, the first bound in (3) already gives
+C_W L<=C_W sqrt(L)*sqrt(R). Otherwise set U=(L/R)^(1/3)>=1 in (2).
+For Nh<=U use (9); for Nh>U use the second bound in (3). The absolute
+value of the normalized inverse is at most
+
+    C_W [R*L^(-1/2) sum_{Nh<=U}(Nh)^(1/2)
+                          +sqrt(L) sum_{Nh>U}(Nh)^(-5/2)].
+
+Linear ideal counting, with partial summation or dyadic bands, gives
+sum_{Nh<=U}(Nh)^(1/2)<=128*U^(3/2) and
+sum_{Nh>U}(Nh)^(-5/2)<=512*U^(-3/2).
+Both terms are O_W(sqrt(R)) at this U. Multiply (2) by sqrt(L) to obtain
+(1). This proves the theorem for every L>0. IdealPowerSums.lean and
+CubeInverseAssembly.lean verify these inequalities and the exact balance.
+
+8. COPRIMALITY MASKS BY EXACT EXTRACTION
+
+In addition to the data of section 2, let M be supported and admissible:
+M is squarefree and its canonical primary generator is nonzero. Suppose
+M is coprime to both I and Q. Define
+
+    mask_M(n) = 1 if (M,(n))=1, and 0 otherwise,
+    E(M) = product_{p|M}[1+sqrt(2(Np)^(-1/2)+(Np)^(-2))].
+
+There is a single C_W, chosen before I,M,Q,phi,L, such that
+
+    |P_{Psi*mask_M,W}(L)|
+      <= C_W sqrt(L) (NQ)^(3/4) sqrt(D(I,Q)) E(M).                 (10)
+
+For every epsilon>0, E(M)<=C_epsilon (NM)^epsilon uniformly in M.
+Thus (10) also holds with E(M) replaced by (NM)^epsilon, and the one
+constant replaced by C_{W,epsilon}. The fixed profile W and epsilon
+are chosen before that constant; all ideals and characters come after it.
+
+Here is the complete reduction. For admissible squarefree D the exact
+Gauss CRT identity, including shared-factor zeros, is
+
+    gamma(DJ)=gamma(D) gamma(J) fourthTwist_D(n_J).
+
+The character fourthTwist_D is the square of the cubic ideal character,
+equivalently the canonical sextic character at exponent four. Its
+orientation is fixed by the upstream multiplicativity theorem; no Gauss
+conjugation is introduced. Multiplicativity of Psi and ideal norms then
+identifies the part of P_Psi,W(L) supported on D-divisible ideals as
+
+    columnWeight(Psi,D) P_{Psi*fourthTwist_D,W}(L/ND).
+
+Terms sharing a factor between D and J vanish on both sides. Inadmissible
+primary-generator and nonsquarefree terms retain their original zeros.
+Finite ideal Mobius inclusion-exclusion consequently gives the exact
+identity, even without coprimality assumptions between Psi and M,
+
+    P_{Psi*mask_M,W}(L)
+      = sum_{D|M} mu(D) columnWeight(Psi,D)
+                          P_{Psi*fourthTwist_D,W}(L/ND).           (11)
+
+The coefficient outside the shifted projection has absolute value at
+most one. Compact support justifies the finite rearrangements.
+MaskExtraction.lean verifies (11) for the actual source coefficient.
+
+Because D divides M, its prime support is disjoint from I and Q. The
+exact source row identity and its local cost factorization are
+
+    freePrimeRow(I,Q)*fourthTwist_D = freePrimeRow(I D^4,Q),
+    D(I D^4,Q) = D(I,Q) product_{p|D}[2sqrt(Np)+(Np)^(-1)].
+
+MaskSourceAdapter.lean proves both. The first identity only requires
+coprimality of D and Q; disjointness from I is used in the second.
+Apply (1) to each shifted projection in (11). Its constant is chosen
+before D, so it appears only once outside the divisor sum. The remaining
+factor equals
+
+    sum_{D|M} sqrt(product_{p|D}[2sqrt(Np)+(Np)^(-1)])/sqrt(ND)
+      = sum_{D|M} product_{p|D}sqrt(2(Np)^(-1/2)+(Np)^(-2))
+      = product_{p|M}[1+sqrt(2(Np)^(-1/2)+(Np)^(-2))].
+
+The first equality uses exact norm factorization for squarefree ideals;
+the second is the finite subset Euler identity. This proves (10).
+For q>=1 every factor is <=4, so E(M)<=4^omega(M)=(2^omega(M))^2.
+The upstream uniform prime-support subset bound at epsilon/2, squared,
+gives E(M)<=C_epsilon (NM)^epsilon. The finite identity, norm conversion,
+and subpower inequality are checked in MaskEulerProduct.lean. The full
+actual corollaries are checked in MaskedCompositeProjection.lean.
+
+The displayed E(M) formula assumes a separate disjoint mask. Overlap is
+handled by explicit identities, not by pretending the same factorization
+holds unchanged: an admissible mask D dividing Q factors modulo Q and
+can be absorbed into phi without changing the modulus or its norm bound;
+a mask D dividing I and coprime to Q is already present in freePrimeRow
+and is redundant. Products of admissible masks split multiplicatively.
+MaskOverlap.lean checks these identities. They allow a prime partition
+into fixed-base, existing-moving, and genuinely new mask support; the
+remaining new support is the M in (10).
+
+For a single large prime the new factor is 1+O(q^(-1/4)). It need not be
+smaller than sqrt(d_0(q)) at every small prime. Neither upper bound is
+claimed optimal. In the pure cubic angular specialization this extraction
+is an elementary addition to the adjacent Patterson angular input;
+its inclusion here is not a claim of analytic novelty.
+
+The readable entry points are in lean/FinalTheorems.lean:
+CubicGaussProjections.mixed_prime_projection,
+CubicGaussProjections.coprimality_mask_projection, and
+CubicGaussProjections.coprimality_mask_subpower.
+
+9. PROVENANCE, SCOPE, AND VERIFICATION
+
+The field, canonical characters, normalized Gauss coefficient, exact
+cusp/stratum reflection identities, trace convention, Mellin kernel, and
+Mobius cube inversion come from OpenAI's mathematics source, pinned at
+fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb. The added files assemble explicit
+simultaneous divisor costs and carry them to the actual mixed source.
+The assembly was developed with AI assistance. No exclusive author or
+priority claim is made.
+
+Adjacent Patterson angular estimates in the same upstream release
+already supply comparable quarter-power conductor behavior in a cubic
+level specialization. This companion therefore does not claim a new
+analytic discovery. It makes the exact mixed local product and its
+formal source connection explicit. The bound is not asserted optimal. Section 8 gives an exact extraction
+which lowers the asymptotic cost of separate exponent-zero masks.
+
+This theorem is about smooth Gauss-weighted projections. It is not an
+unsmoothed Mobius-sum bound, an arbitrary marking theorem, a canonical
+detector energy saving, or a zeta/Hecke zero-free improvement. In
+particular, no cancellation of the cube weight's nonzero angular type
+is inferred from a finite-order Hecke-character theorem.
+
+Lean compiled the actual-source theorem, the explicit prime-product
+corollary, and the separate-mask corollaries with only propext, Classical.choice, Quot.sound. The source
+bundle records exact SHA-256 hashes and checks its experimental import
+closure. Ordinary compilation is not a second-kernel check, a separate
+fresh exported-proof replay, or external peer review. Read the neutral
+verification summary for the checks actually completed on this bundle.
+
+10. PINNED SOURCE MAP
+
+Repository and revision:
+https://github.com/openai/math/tree/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb
+
+Lean definitions gamma, gaussTwo, cubeWeight, completedT:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Arithmetic/IdealMobius.lean
+
+Trace convention and Lambda normalization:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Eisenstein/BesselMellinTransform.lean
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Eisenstein/FourierCoefficients.lean
+
+Exact ideal cube inverse:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/GaussSum/CompletedExpansion.lean
+
+Finite local bracket formulas:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/GaussSum/ReflectionBrackets.lean
+
+Exact actual completed-source identity:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/GaussSum/ResidualEquivalence.lean
+
+Fixed conductor/cusp arithmetic and supported frequency columns:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Eisenstein/FixedConductor.lean
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Eisenstein/FixedRayFibers.lean
+
+Mellin kernel estimates and explicit ideal count:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Mellin/UniformKernelBounds.lean
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Mellin/InverseContour.lean
+
+Adjacent Patterson manuscript, for normalization/provenance comparison:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/preprints/An-unconditional-first-moment-for-cubic-Gauss-sums-September-25-2026/build/sections/angular.tex
+
+Exact Gauss CRT multiplicativity for mask extraction:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Detector/CubicGaussCRT.lean
+
+Finite ideal divisors and their uniform subpower count:
+https://github.com/openai/math/blob/fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb/lean/OAI/NumberTheory/DirichletL/Arithmetic/SquarefreeDivisors.lean

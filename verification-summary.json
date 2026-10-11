@@ -1,0 +1,63 @@
+{
+  "format": "gauss-projection-verification-summary-v2",
+  "kind": "ordinary_Lean_source_compilation",
+  "date_utc": "2026-10-11T10:29:25.740422+00:00",
+  "toolchain": "Lean 4.34.1",
+  "module_count": 40,
+  "all_included_modules_checked": true,
+  "compiled_in_original_portable_run": 33,
+  "compiled_in_update_portable_run": 7,
+  "unchanged_modules_reused_after_source_and_object_hash_check": 33,
+  "source_identical_to_research_copies": true,
+  "root_module": "FinalTheorems",
+  "final_theorems": [
+    "CubicGaussProjections.mixed_prime_projection",
+    "CubicGaussProjections.coprimality_mask_projection",
+    "CubicGaussProjections.coprimality_mask_subpower"
+  ],
+  "axioms_allowed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "unexpected_axioms_found": false,
+  "fresh_export_kernel_replay": false,
+  "independent_second_kernel": false,
+  "full_foundation_source_rebuild": false,
+  "upstream_OAI_source_count": 353,
+  "all_OAI_sources_match_pinned_upstream": true,
+  "experimental_dependency_closure": "passed",
+  "portable_wrapper_execution": "passed",
+  "resource_limits": {
+    "maximum_Lean_threads": 2,
+    "one_Lean_process_at_a_time": true,
+    "Lean_MiB_cap": 6144,
+    "systemd_MemoryMax": "7G",
+    "systemd_MemorySwapMax": 0
+  },
+  "portable_runs": [
+    {
+      "scope": "original 33 modules",
+      "runtime_seconds": 102.856,
+      "peak_memory_MiB": 605.7,
+      "swap_bytes": 0
+    },
+    {
+      "scope": "seven added modules; previous 33 source/object hashes checked",
+      "runtime_seconds": 20.355,
+      "peak_memory_MiB": 541.2,
+      "swap_bytes": 0
+    }
+  ],
+  "final_axiom_receipts": [
+    "'CubicGaussProjections.mixed_prime_projection' depends on axioms: [propext, Classical.choice, Quot.sound]",
+    "'CubicGaussProjections.coprimality_mask_projection' depends on axioms: [propext, Classical.choice, Quot.sound]",
+    "'CubicGaussProjections.coprimality_mask_subpower' depends on axioms: [propext, Classical.choice, Quot.sound]"
+  ],
+  "build_summary_sha256": "306f97b7b9886c7d6dac8aeba47950b712c5adbb5fe77198ad4e92779ed00256",
+  "limitations": [
+    "Reuses prebuilt foundation objects; the wrapper checks OAI source hashes and dependency configuration, not a fresh foundation or dependency-package rebuild.",
+    "No Comparator/export replay, second kernel, external review, or novelty assessment is implied.",
+    "The result is fixed-W. Separate-mask corollaries require the stated coprimality assumptions. No zero-free endpoint change is established."
+  ]
+}
